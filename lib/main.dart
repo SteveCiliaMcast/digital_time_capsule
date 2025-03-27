@@ -1,13 +1,7 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'firebase_options.dart';
-import 'create_screen.dart'; // Import the new screen
+import 'create_screen.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+void main() {
   runApp(const MainApp());
 }
 
@@ -16,8 +10,24 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: MainScreen(),
+    return MaterialApp(
+      theme: ThemeData(
+        primaryColor: const Color(0xFFE3B6B1),
+        scaffoldBackgroundColor: const Color(0xFFFFE3D8),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFE3B6B1),
+          foregroundColor: Colors.black,
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFF845162),
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(),
+        ),
+      ),
+      home: const MainScreen(),
     );
   }
 }
@@ -28,24 +38,16 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Main Screen")),
-      body: const Center(
-        child: Text("Main Screen", style: TextStyle(fontSize: 24)),
-      ),
-      floatingActionButton: Align(
-        alignment: Alignment.bottomRight,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0), // Adjust padding for positioning
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CreateScreen()),
-              );
-            },
-            child: const Icon(Icons.add), // "+" icon
-          ),
-        ),
+      appBar: AppBar(title: const Text("Digital Time Capsule")),
+      body: const Center(child: Text("Map will be here")),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreateScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

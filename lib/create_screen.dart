@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
+import 'capsule_form.dart';
 
 class CreateScreen extends StatefulWidget {
   const CreateScreen({super.key});
@@ -8,27 +10,44 @@ class CreateScreen extends StatefulWidget {
 }
 
 class _CreateScreenState extends State<CreateScreen> {
-  final _formKey = GlobalKey<FormState>(); // To validate form
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
+  final Location _location = Location();
 
-  // Submit function to handle form submission
+  void _getCurrentLocation() async {
+    try {
+      bool serviceEnabled = await _location.serviceEnabled();
+      if (!serviceEnabled) {
+        serviceEnabled = await _location.requestService();
+        if (!serviceEnabled) return;
+      }
+
+      PermissionStatus permissionGranted = await _location.hasPermission();
+      if (permissionGranted == PermissionStatus.denied) {
+        permissionGranted = await _location.requestPermission();
+        if (permissionGranted != PermissionStatus.granted) return;
+      }
+
+      LocationData currentLocation = await _location.getLocation();
+      setState(() {
+        _latitudeController.text = currentLocation.latitude.toString();
+        _longitudeController.text = currentLocation.longitude.toString();
+      });
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to get location: $e')),
+      );
+    }
+  }
+
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      // Here you can save the data (e.g., to Firebase)
-      String title = _titleController.text;
-      String description = _descriptionController.text;
-      double latitude = double.tryParse(_latitudeController.text) ?? 0.0;
-      double longitude = double.tryParse(_longitudeController.text) ?? 0.0;
-
-      // Example: Just print the input values to the console
-      print('Capsule created with title: $title');
-      print('Description: $description');
-      print('Location: $latitude, $longitude');
-
-      // You can navigate back or show a success message
+      print(
+          'Capsule Created: ${_titleController.text}, ${_latitudeController.text}, ${_longitudeController.text}');
       Navigator.pop(context);
     }
   }
@@ -41,83 +60,13 @@ class _CreateScreenState extends State<CreateScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Title Input Field
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Description Input Field
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a description';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Latitude Input Field
-              TextFormField(
-                controller: _latitudeController,
-                decoration: const InputDecoration(
-                  labelText: 'Latitude',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a latitude';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Longitude Input Field
-              TextFormField(
-                controller: _longitudeController,
-                decoration: const InputDecoration(
-                  labelText: 'Longitude',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a longitude';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // Submit Button
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Create Capsule'),
-              ),
-            ],
+          child: CapsuleForm(
+            titleController: _titleController,
+            descriptionController: _descriptionController,
+            latitudeController: _latitudeController,
+            longitudeController: _longitudeController,
+            getCurrentLocation: _getCurrentLocation,
+            submitForm: _submitForm,
           ),
         ),
       ),
