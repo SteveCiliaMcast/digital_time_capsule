@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "824653771650",
+    "project_id": "digital-time-capsule-b7161",
+    "storage_bucket": "digital-time-capsule-b7161.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:824653771650:android:e6a4e0e25ecdb87c79d59b",
+        "android_client_info": {
+          "package_name": "com.example.digital_time_capsule"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWYLC7hPINVVSlSmWXrJIAS1qUMkNNvq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
