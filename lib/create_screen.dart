@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:location/location.dart';
 import 'capsule_form.dart';
 
@@ -15,6 +18,8 @@ class _CreateScreenState extends State<CreateScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
+  final DatabaseReference _dbRef =
+      FirebaseDatabase.instance.ref().child('capsules');
   final Location _location = Location();
 
   void _getCurrentLocation() async {
@@ -37,18 +42,38 @@ class _CreateScreenState extends State<CreateScreen> {
         _longitudeController.text = currentLocation.longitude.toString();
       });
     } catch (e) {
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to get location: $e')),
       );
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      print(
-          'Capsule Created: ${_titleController.text}, ${_latitudeController.text}, ${_longitudeController.text}');
-      Navigator.pop(context);
+      String title = _titleController.text;
+      String description = _descriptionController.text;
+      double latitude = double.tryParse(_latitudeController.text) ?? 0.0;
+      double longitude = double.tryParse(_longitudeController.text) ?? 0.0;
+
+      Map<String, dynamic> capsule = {
+        'title': title,
+        'description': description,
+        'latitude': latitude,
+        'longitude': longitude,
+        'created_at': DateTime.now().toIso8601String(),
+      };
+
+      try {
+        await _dbRef.push().set(capsule);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Capsule Created Successfully!')),
+        );
+        Navigator.pop(context); // Return to the previous screen
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving capsule: $e')),
+        );
+      }
     }
   }
 
