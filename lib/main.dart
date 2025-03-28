@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'create_screen.dart';
+import 'bottom_nav_bar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,9 +21,6 @@ class MainApp extends StatelessWidget {
           backgroundColor: Color(0xFFE3B6B1),
           foregroundColor: Colors.black,
         ),
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Color(0xFF845162),
-        ),
         inputDecorationTheme: const InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
@@ -43,14 +40,9 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Digital Time Capsule")),
       body: const Center(child: Text("Map will be here")),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateScreen()),
-          );
-        },
-        child: const Icon(Icons.add),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: 0, // Home index
+        context: context,
       ),
     );
   }
