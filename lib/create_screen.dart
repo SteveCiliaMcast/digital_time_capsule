@@ -1,9 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:location/location.dart';
 import 'capsule_form.dart';
+import 'bottom_nav_bar.dart';
+import 'photo_capture_widget.dart'; // Import the new widget
 
 class CreateScreen extends StatefulWidget {
   const CreateScreen({super.key});
@@ -21,6 +21,7 @@ class _CreateScreenState extends State<CreateScreen> {
   final DatabaseReference _dbRef =
       FirebaseDatabase.instance.ref().child('capsules');
   final Location _location = Location();
+  String? _base64Image;
 
   void _getCurrentLocation() async {
     try {
@@ -60,6 +61,7 @@ class _CreateScreenState extends State<CreateScreen> {
         'description': description,
         'latitude': latitude,
         'longitude': longitude,
+        'image': _base64Image, // Save the Base64 image
         'created_at': DateTime.now().toIso8601String(),
       };
 
@@ -80,20 +82,42 @@ class _CreateScreenState extends State<CreateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Capsule")),
+      appBar: AppBar(
+        title: const Text("Create Capsule"),
+        automaticallyImplyLeading: false, // Removes back button
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: CapsuleForm(
-            titleController: _titleController,
-            descriptionController: _descriptionController,
-            latitudeController: _latitudeController,
-            longitudeController: _longitudeController,
-            getCurrentLocation: _getCurrentLocation,
-            submitForm: _submitForm,
+          child: Column(
+            children: [
+              // Photo Capture Widget
+              PhotoCaptureWidget(
+                onImageCaptured: (base64) {
+                  setState(() {
+                    _base64Image = base64;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Capsule Form Fields
+              CapsuleForm(
+                titleController: _titleController,
+                descriptionController: _descriptionController,
+                latitudeController: _latitudeController,
+                longitudeController: _longitudeController,
+                getCurrentLocation: _getCurrentLocation,
+                submitForm: _submitForm,
+              ),
+            ],
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: 1, // Create index
+        context: context,
       ),
     );
   }
