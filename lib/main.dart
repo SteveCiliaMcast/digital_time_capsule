@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'bottom_nav_bar.dart';
+import 'mainScreen/map_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +40,13 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Digital Time Capsule")),
-      body: const Center(child: Text("Map will be here")),
+      body: const Column(
+        children: [
+          Expanded(
+            child: MapWidget(),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: 0, // Home index
         context: context,

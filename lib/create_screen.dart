@@ -1,9 +1,11 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:location/location.dart';
-import 'capsule_form.dart';
+import 'createScreen/capsule_form.dart';
 import 'bottom_nav_bar.dart';
-import 'photo_capture_widget.dart'; // Import the new widget
+import 'createScreen/photo_capture_widget.dart'; // Import the new widget
 
 class CreateScreen extends StatefulWidget {
   const CreateScreen({super.key});
@@ -86,32 +88,37 @@ class _CreateScreenState extends State<CreateScreen> {
         title: const Text("Create Capsule"),
         automaticallyImplyLeading: false, // Removes back button
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // Photo Capture Widget
-              PhotoCaptureWidget(
-                onImageCaptured: (base64) {
-                  setState(() {
-                    _base64Image = base64;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
+      resizeToAvoidBottomInset:
+          true, // Ensures keyboard does not cause overflow
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Photo Capture Widget
+                PhotoCaptureWidget(
+                  onImageCaptured: (base64) {
+                    setState(() {
+                      _base64Image = base64;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
 
-              // Capsule Form Fields
-              CapsuleForm(
-                titleController: _titleController,
-                descriptionController: _descriptionController,
-                latitudeController: _latitudeController,
-                longitudeController: _longitudeController,
-                getCurrentLocation: _getCurrentLocation,
-                submitForm: _submitForm,
-              ),
-            ],
+                // Capsule Form Fields
+                CapsuleForm(
+                  titleController: _titleController,
+                  descriptionController: _descriptionController,
+                  latitudeController: _latitudeController,
+                  longitudeController: _longitudeController,
+                  getCurrentLocation: _getCurrentLocation,
+                  submitForm: _submitForm,
+                ),
+              ],
+            ),
           ),
         ),
       ),
