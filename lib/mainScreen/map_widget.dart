@@ -1,4 +1,5 @@
 import 'package:digital_time_capsule/location_service.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -16,11 +17,15 @@ class _MapWidgetState extends State<MapWidget> {
   LatLng? _currentLocation;
   final MapController _mapController = MapController();
   final LocationService _locationService = LocationService();
+  final DatabaseReference _capsulesRef =
+      FirebaseDatabase.instance.ref('capsules');
+  List<Map<String, dynamic>> _capsules = [];
 
   @override
   void initState() {
     super.initState();
     _fetchUserLocation();
+    _fetchCapsules();
   }
 
   Future<void> _fetchUserLocation() async {
@@ -31,13 +36,32 @@ class _MapWidgetState extends State<MapWidget> {
             LatLng(locationData.latitude!, locationData.longitude!);
       });
 
-      // Move the map to the user's location after a short delay for smooth transition
       Future.delayed(const Duration(milliseconds: 200), () {
         if (mounted && _currentLocation != null) {
-          _mapController.move(_currentLocation!, 14.0);
+          _mapController.move(_currentLocation!, 15.0);
         }
       });
     }
+  }
+
+  Future<void> _fetchCapsules() async {
+    _capsulesRef.onValue.listen((DatabaseEvent event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+
+      if (data != null) {
+        setState(() {
+          _capsules = data.entries.map((entry) {
+            final value = entry.value as Map<dynamic, dynamic>;
+            return {
+              "title": value["title"] ?? "Untitled",
+              "latitude": value["latitude"] ?? 0.0,
+              "longitude": value["longitude"] ?? 0.0,
+              "description": value["description"] ?? "",
+            };
+          }).toList();
+        });
+      }
+    });
   }
 
   @override
@@ -49,24 +73,52 @@ class _MapWidgetState extends State<MapWidget> {
         child: FlutterMap(
           mapController: _mapController,
           options: MapOptions(
-            initialCenter: _currentLocation ?? const LatLng(35.8992, 14.5141),
-            initialZoom: 13.0,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
-              pinchZoomThreshold: 1.5,
-            ),
+            initialCenter: _currentLocation ?? const LatLng(37.7749, -122.4194),
+            initialZoom: 10.0,
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://a.tile.openstreetmap.de/{z}/{x}/{y}.png',
+              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
               subdomains: const ['a', 'b', 'c'],
-              tileSize: 256,
-              maxZoom: 18,
-              minZoom: 3,
+            ),
+            MarkerLayer(
+              markers: _capsules.map((capsule) {
+                return Marker(
+                  width: 40.0,
+                  height: 40.0,
+                  point: LatLng(capsule["latitude"], capsule["longitude"]),
+                  child: GestureDetector(
+                    onTap: () => _showCapsuleDetails(context, capsule),
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 40.0,
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showCapsuleDetails(BuildContext context, Map<String, dynamic> capsule) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(capsule["title"]),
+          content: Text(capsule["description"]),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      },
     );
   }
 }
