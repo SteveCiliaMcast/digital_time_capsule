@@ -36,17 +36,17 @@ class CapsuleForm extends StatelessWidget {
             Expanded(
                 child: _buildTextField(latitudeController, 'Latitude',
                     keyboardType: TextInputType.number)),
-            const SizedBox(width: 8), // Space between fields
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(LucideIcons.locateFixed), // Location icon
+              onPressed: getCurrentLocation,
+              tooltip: 'Get Current Location',
+            ), // Space between fields
             Expanded(
                 child: _buildTextField(longitudeController, 'Longitude',
                     keyboardType: TextInputType.number)),
             const SizedBox(width: 8),
             // Location Button
-            IconButton(
-              icon: const Icon(LucideIcons.locateFixed), // Location icon
-              onPressed: getCurrentLocation,
-              tooltip: 'Get Current Location',
-            ),
           ],
         ),
         const SizedBox(height: 24),

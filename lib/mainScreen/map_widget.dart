@@ -1,7 +1,9 @@
+import 'package:digital_time_capsule/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location/location.dart';
+// import 'package:location/location.dart';
+// import 'location_service.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -13,39 +15,27 @@ class MapWidget extends StatefulWidget {
 class _MapWidgetState extends State<MapWidget> {
   LatLng? _currentLocation;
   final MapController _mapController = MapController();
-  final Location _location = Location();
+  final LocationService _locationService = LocationService();
 
   @override
   void initState() {
     super.initState();
-    _getUserLocation();
+    _fetchUserLocation();
   }
 
-  Future<void> _getUserLocation() async {
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-
-    // Check if location service is enabled
-    serviceEnabled = await _location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await _location.requestService();
-      if (!serviceEnabled) return;
-    }
-
-    // Check location permission
-    permissionGranted = await _location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await _location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) return;
-    }
-
-    // Get user's current location
-    final locationData = await _location.getLocation();
-    if (locationData.latitude != null && locationData.longitude != null) {
+  Future<void> _fetchUserLocation() async {
+    final locationData = await _locationService.getCurrentLocation(context);
+    if (locationData != null && mounted) {
       setState(() {
         _currentLocation =
             LatLng(locationData.latitude!, locationData.longitude!);
-        _mapController.move(_currentLocation!, 15.0); // Zoom to user location
+      });
+
+      // Move the map to the user's location after a short delay for smooth transition
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted && _currentLocation != null) {
+          _mapController.move(_currentLocation!, 14.0);
+        }
       });
     }
   }
@@ -53,20 +43,26 @@ class _MapWidgetState extends State<MapWidget> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12), // Rounded edges
+      borderRadius: BorderRadius.circular(12),
       child: SizedBox(
-        height: 400, // Adjust height
+        height: 400,
         child: FlutterMap(
           mapController: _mapController,
           options: MapOptions(
-            initialCenter:
-                _currentLocation ?? LatLng(37.7749, -122.4194), // Default: SF
-            initialZoom: 5.0,
+            initialCenter: _currentLocation ?? const LatLng(35.8992, 14.5141),
+            initialZoom: 13.0,
+            interactionOptions: const InteractionOptions(
+              flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+              pinchZoomThreshold: 1.5,
+            ),
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: ['a', 'b', 'c'],
+              urlTemplate: 'https://a.tile.openstreetmap.de/{z}/{x}/{y}.png',
+              subdomains: const ['a', 'b', 'c'],
+              tileSize: 256,
+              maxZoom: 18,
+              minZoom: 3,
             ),
           ],
         ),
