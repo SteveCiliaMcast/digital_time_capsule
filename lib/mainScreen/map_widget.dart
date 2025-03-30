@@ -1,10 +1,9 @@
-import 'package:digital_time_capsule/location_service.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:digital_time_capsule/mainScreen/capsule_marker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-// import 'package:location/location.dart';
-// import 'location_service.dart';
+import 'package:digital_time_capsule/services/location_service.dart';
+import 'package:digital_time_capsule/services/capsule_service.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -17,8 +16,7 @@ class _MapWidgetState extends State<MapWidget> {
   LatLng? _currentLocation;
   final MapController _mapController = MapController();
   final LocationService _locationService = LocationService();
-  final DatabaseReference _capsulesRef =
-      FirebaseDatabase.instance.ref('capsules');
+  final CapsuleService _capsuleService = CapsuleService();
   List<Map<String, dynamic>> _capsules = [];
 
   @override
@@ -36,29 +34,19 @@ class _MapWidgetState extends State<MapWidget> {
             LatLng(locationData.latitude!, locationData.longitude!);
       });
 
-      Future.delayed(const Duration(milliseconds: 200), () {
+      Future.delayed(const Duration(milliseconds: 1), () {
         if (mounted && _currentLocation != null) {
-          _mapController.move(_currentLocation!, 15.0);
+          _mapController.move(_currentLocation!, 13.0);
         }
       });
     }
   }
 
-  Future<void> _fetchCapsules() async {
-    _capsulesRef.onValue.listen((DatabaseEvent event) {
-      final data = event.snapshot.value as Map<dynamic, dynamic>?;
-
-      if (data != null) {
+  void _fetchCapsules() {
+    _capsuleService.getCapsulesStream().listen((capsules) {
+      if (mounted) {
         setState(() {
-          _capsules = data.entries.map((entry) {
-            final value = entry.value as Map<dynamic, dynamic>;
-            return {
-              "title": value["title"] ?? "Untitled",
-              "latitude": value["latitude"] ?? 0.0,
-              "longitude": value["longitude"] ?? 0.0,
-              "description": value["description"] ?? "",
-            };
-          }).toList();
+          _capsules = capsules;
         });
       }
     });
@@ -73,7 +61,7 @@ class _MapWidgetState extends State<MapWidget> {
         child: FlutterMap(
           mapController: _mapController,
           options: MapOptions(
-            initialCenter: _currentLocation ?? const LatLng(37.7749, -122.4194),
+            initialCenter: _currentLocation ?? const LatLng(1, 1),
             initialZoom: 10.0,
           ),
           children: [
@@ -82,43 +70,13 @@ class _MapWidgetState extends State<MapWidget> {
               subdomains: const ['a', 'b', 'c'],
             ),
             MarkerLayer(
-              markers: _capsules.map((capsule) {
-                return Marker(
-                  width: 40.0,
-                  height: 40.0,
-                  point: LatLng(capsule["latitude"], capsule["longitude"]),
-                  child: GestureDetector(
-                    onTap: () => _showCapsuleDetails(context, capsule),
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 40.0,
-                    ),
-                  ),
-                );
-              }).toList(),
+              markers: _capsules
+                  .map((capsule) => CapsuleMarker.create(capsule, context))
+                  .toList(),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  void _showCapsuleDetails(BuildContext context, Map<String, dynamic> capsule) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(capsule["title"]),
-          content: Text(capsule["description"]),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Close"),
-            ),
-          ],
-        );
-      },
     );
   }
 }
