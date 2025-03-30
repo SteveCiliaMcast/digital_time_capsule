@@ -4,7 +4,8 @@ import 'package:latlong2/latlong.dart';
 import 'capsule_details.dart';
 
 class CapsuleMarker {
-  static Marker create(Map<String, dynamic> capsule, BuildContext context) {
+  static Marker create(Map<String, dynamic> capsule, BuildContext context,
+      LatLng? userLocation) {
     return Marker(
       width: 120.0,
       height: 50.0,
@@ -18,7 +19,7 @@ class CapsuleMarker {
               color: Colors.white,
               borderRadius: BorderRadius.circular(6),
               boxShadow: const [
-                BoxShadow(color: Colors.black26, blurRadius: 3)
+                BoxShadow(color: Colors.black26, blurRadius: 3),
               ],
             ),
             child: Text(
@@ -28,7 +29,7 @@ class CapsuleMarker {
             ),
           ),
           GestureDetector(
-            onTap: () => showCapsuleDetails(context, capsule),
+            onTap: () => showCapsuleDetails(context, capsule, userLocation),
             child: const Icon(
               Icons.location_on,
               color: Color.fromARGB(255, 127, 4, 135),
