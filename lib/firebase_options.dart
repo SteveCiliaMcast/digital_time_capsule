@@ -48,6 +48,8 @@ class DefaultFirebaseOptions {
     authDomain: 'digital-time-capsule-b7161.firebaseapp.com',
     storageBucket: 'digital-time-capsule-b7161.firebasestorage.app',
     measurementId: 'G-4LB0P83Q06',
+    databaseURL:
+        'https://digital-time-capsule-b7161-default-rtdb.europe-west1.firebasedatabase.app/',
   );
 
   static const FirebaseOptions android = FirebaseOptions(

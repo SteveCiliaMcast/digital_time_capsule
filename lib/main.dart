@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // Import the plugin
 import 'package:permission_handler/permission_handler.dart';
+import 'firebase_options.dart'; // Import the generated Firebase options
 import 'bottom_nav_bar.dart';
 import 'mainScreen/map_widget.dart';
 
@@ -11,7 +12,11 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+
+  // Initialize Firebase with platform-specific options
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Initialize the local notifications plugin
   const AndroidInitializationSettings initializationSettingsAndroid =
