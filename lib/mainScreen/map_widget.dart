@@ -77,7 +77,8 @@ class _MapWidgetState extends State<MapWidget> {
         child: FlutterMap(
           mapController: _mapController,
           options: MapOptions(
-            initialCenter: _currentLocation ?? const LatLng(37.7749, -122.4194),
+            initialCenter:
+                _currentLocation ?? const LatLng(35.8992375, 14.5140996),
             initialZoom: 13.0,
           ),
           children: [
@@ -115,14 +116,14 @@ class _MapWidgetState extends State<MapWidget> {
                 markers: [
                   Marker(
                     point: _currentLocation!,
-                    width: 40,
-                    height: 40,
+                    width: 20,
+                    height: 20,
                     child: Transform.rotate(
                       angle: 0, // Adjust if you want it to rotate dynamically
                       child: const Icon(
                         Icons.circle, // Arrow-like icon
                         color: Colors.red,
-                        size: 20,
+                        size: 10,
                       ),
                     ),
                   ),

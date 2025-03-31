@@ -3,9 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:location/location.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'createScreen/capsule_form.dart';
 import 'bottom_nav_bar.dart';
 import 'createScreen/photo_capture_widget.dart'; // Import the new widget
+import '../main.dart'; // Import the initialized notification plugin
 
 class CreateScreen extends StatefulWidget {
   const CreateScreen({super.key});
@@ -69,6 +71,10 @@ class _CreateScreenState extends State<CreateScreen> {
 
       try {
         await _dbRef.push().set(capsule);
+
+        // Show success notification
+        _showNotification();
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Capsule Created Successfully!')),
         );
@@ -79,6 +85,27 @@ class _CreateScreenState extends State<CreateScreen> {
         );
       }
     }
+  }
+
+  Future<void> _showNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'capsule_channel', // Channel ID
+      'Capsule Notifications', // Channel name
+      channelDescription: 'Notifications for capsule creation',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0, // Notification ID
+      'Capsule Created', // Notification title
+      'A new capsule has been successfully created!', // Notification body
+      platformChannelSpecifics,
+    );
   }
 
   @override
