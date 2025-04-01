@@ -36,7 +36,7 @@ class _MapWidgetState extends State<MapWidget> {
     if (locationData != null && mounted) {
       setState(() {
         _currentLocation =
-            LatLng(locationData.latitude!, locationData.longitude!);
+            LatLng(locationData.latitude, locationData.longitude);
       });
 
       Future.delayed(const Duration(milliseconds: 1), () {
@@ -95,6 +95,7 @@ class _MapWidgetState extends State<MapWidget> {
                     point: _currentLocation!,
                     radius: 500, // 500m radius
                     useRadiusInMeter: true,
+                    // ignore: deprecated_member_use
                     color: Colors.lightBlue.withOpacity(0.3),
                     borderColor: Colors.blue,
                     borderStrokeWidth: 2,

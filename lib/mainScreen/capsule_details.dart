@@ -15,7 +15,7 @@ void showCapsuleDetails(
     return;
   }
 
-  final Distance distance = const Distance();
+  const Distance distance = Distance();
   final double capsuleDistance = distance.as(LengthUnit.Meter, userLocation,
       LatLng(capsule["latitude"], capsule["longitude"]));
 

@@ -1,0 +1,2 @@
+C:/Flutter Apps/digital_time_capsule/android/app/.cxx/Debug/534v3i2m/x86_64/CMakeFiles/edit_cache.dir
+C:/Flutter Apps/digital_time_capsule/android/app/.cxx/Debug/534v3i2m/x86_64/CMakeFiles/rebuild_cache.dir

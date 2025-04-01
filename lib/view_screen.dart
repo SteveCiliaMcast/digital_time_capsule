@@ -1,10 +1,11 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
 
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart'; // For geolocation
 import 'bottom_nav_bar.dart';
+import 'services/location_service.dart'; // Import the LocationService
 
 class ViewScreen extends StatefulWidget {
   const ViewScreen({super.key});
@@ -16,7 +17,8 @@ class ViewScreen extends StatefulWidget {
 class _ViewScreenState extends State<ViewScreen> {
   final DatabaseReference _dbRef =
       FirebaseDatabase.instance.ref().child('capsules');
-  final Location _location = Location();
+  final LocationService _locationService =
+      LocationService(); // Use LocationService
 
   List<Map<String, dynamic>> _capsules = [];
   double? _userLatitude;
@@ -39,22 +41,38 @@ class _ViewScreenState extends State<ViewScreen> {
             capsule['id'] = entry.key; // Save ID for future actions
             return capsule;
           }).toList();
+
+          // Sort capsules by distance if user location is available
+          if (_userLatitude != null && _userLongitude != null) {
+            _capsules.sort((a, b) {
+              final distanceA = _calculateDistance(
+                _userLatitude!,
+                _userLongitude!,
+                a['latitude'] ?? 0.0,
+                a['longitude'] ?? 0.0,
+              );
+              final distanceB = _calculateDistance(
+                _userLatitude!,
+                _userLongitude!,
+                b['latitude'] ?? 0.0,
+                b['longitude'] ?? 0.0,
+              );
+              return distanceA.compareTo(distanceB);
+            });
+          }
         });
       }
     });
   }
 
   void _getCurrentLocation() async {
-    try {
-      final locationData = await _location.getLocation();
+    final Position? position =
+        await _locationService.getCurrentLocation(context);
+    if (position != null) {
       setState(() {
-        _userLatitude = locationData.latitude;
-        _userLongitude = locationData.longitude;
+        _userLatitude = position.latitude;
+        _userLongitude = position.longitude;
       });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to get location: $e')),
-      );
     }
   }
 

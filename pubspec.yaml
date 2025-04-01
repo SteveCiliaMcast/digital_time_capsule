@@ -13,11 +13,11 @@ dependencies:
   firebase_database: ^10.2.3
   flutter_map: ^6.0.0
   latlong2: ^0.9.0  # Required for handling coordinates
-  location: ^5.0.3  # For getting the user's location
   lucide_icons: ^0.257.0
   image_picker: ^1.1.2
   permission_handler: ^11.4.0
   flutter_local_notifications: ^17.2.4
+  geolocator: ^13.0.3
 
 
 dev_dependencies:

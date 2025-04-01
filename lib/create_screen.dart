@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:location/location.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'createScreen/capsule_form.dart';
 import 'bottom_nav_bar.dart';
 import 'createScreen/photo_capture_widget.dart'; // Import the new widget
 import '../main.dart'; // Import the initialized notification plugin
+import 'services/location_service.dart'; // Import the LocationService
 
 class CreateScreen extends StatefulWidget {
   const CreateScreen({super.key});
@@ -24,32 +24,17 @@ class _CreateScreenState extends State<CreateScreen> {
   final TextEditingController _longitudeController = TextEditingController();
   final DatabaseReference _dbRef =
       FirebaseDatabase.instance.ref().child('capsules');
-  final Location _location = Location();
+  final LocationService _locationService =
+      LocationService(); // Use LocationService
   String? _base64Image;
 
   void _getCurrentLocation() async {
-    try {
-      bool serviceEnabled = await _location.serviceEnabled();
-      if (!serviceEnabled) {
-        serviceEnabled = await _location.requestService();
-        if (!serviceEnabled) return;
-      }
-
-      PermissionStatus permissionGranted = await _location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await _location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) return;
-      }
-
-      LocationData currentLocation = await _location.getLocation();
+    final position = await _locationService.getCurrentLocation(context);
+    if (position != null) {
       setState(() {
-        _latitudeController.text = currentLocation.latitude.toString();
-        _longitudeController.text = currentLocation.longitude.toString();
+        _latitudeController.text = position.latitude.toString();
+        _longitudeController.text = position.longitude.toString();
       });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to get location: $e')),
-      );
     }
   }
 
